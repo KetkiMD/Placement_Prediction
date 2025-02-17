@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # Scripts:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: scriptsforcft1
+  MyLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: merger
+      Runtime: python3.13
+      Handler: lambda_function.lambda_handler
+      Role: arn:aws:iam::975049960469:role/LabRole
+      Code:
+        S3Bucket: scriptsforcft24
+        S3Key: lambda_code/LambdaScript.zip
+      Timeout: 15
+      MemorySize: 128
+      Layers:
+        - arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python313:1  # Replace with your region's ARN
+
+  
+
+  MyGlueJobDBDA:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: Glue_dbda
+      Role: arn:aws:iam::975049960469:role/LabRole
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://scriptsforcft24/lambda_code/dbda_glue_script.py"
+        PythonVersion: "3"
+      GlueVersion: "3.0"
+      DefaultArguments:
+        "--job-language": "python"
+      WorkerType: "Standard"
+      NumberOfWorkers: 2
+  MyGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: Glue_dac
+      Role: arn:aws:iam::975049960469:role/LabRole
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://scriptsforcft24/lambda_code/dac_glue_script.py"
+        PythonVersion: "3"
+      GlueVersion: "3.0"
+      DefaultArguments:
+        "--job-language": "python"
+      WorkerType: "Standard"
+      NumberOfWorkers: 2    
+
+  MyS3BucketforGluedata:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ingestionbucketforglue
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .csv  # Trigger only when CSV files are uploaded
+            Function: !GetAtt GlueTriggerFunction.Arn
+
+  MyS3BucketLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref GlueTriggerFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub arn:aws:s3:::ingestionbucketforglue
+  # S3Bucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: dataforsagemaker101
+  GlueTriggerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: GlueTrigger
+      Runtime: python3.13
+      Handler: glue_trigger.lambda_handler
+      Role: arn:aws:iam::975049960469:role/LabRole
+      Code:
+        S3Bucket: scriptsforcft24
+        S3Key: lambda_code/LambdaGlueScript.zip
+      Timeout: 15
+      MemorySize: 128
+
+# Outputs:
+#   BucketName:
+#     Description: "S3 bucket created"
+#     Value: !Ref S3Bucket

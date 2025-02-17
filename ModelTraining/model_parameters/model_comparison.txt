@@ -1,0 +1,12 @@
+Machine Learning Model Comparison
+This document provides a comparison of various machine learning models based on their accuracy, precision, recall, F1-score, and additional characteristics. 
+The evaluation metrics help in selecting the best model for classification tasks.
+
+Metrics Explained
+Train Accuracy & Test Accuracy: Measures the model's correctness on training and test data.
+
+Train Precision & Test Precision: The proportion of correctly identified positive cases.
+
+Train Recall & Test Recall: The ability of the model to find all relevant cases.
+
+Train F1 Score & Test F1 Score: A balance between precision and recall.

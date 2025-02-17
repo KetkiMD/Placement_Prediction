@@ -45,14 +45,4 @@ The Placement Prediction System is a machine learning-based platform that foreca
 - Incorporate additional student attributes such as extracurricular activities.
 - Automate model retraining based on new data.
 
-## Contributors
-- **Dhanesh Nair**
-- **Ketki Dandgavale**
-- **Pritam Singh Rathore**
-- **Priyank Acharekar**
-- **Ram Jaybhaye**
-- **Tarun Kumar**
-- **Vedant Pednekar**
-- **Vipul Patidar**
-
 
